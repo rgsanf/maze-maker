@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
-import type { EnhancedMazeState, Position } from '@/lib/maze-types';
+import type { EnhancedMazeState } from "@/lib/maze-types";
+import { cn } from "@/lib/utils";
 
 interface MazeDebugOverlayProps {
   maze: EnhancedMazeState;
@@ -7,7 +7,11 @@ interface MazeDebugOverlayProps {
   onToggle: () => void;
 }
 
-export function MazeDebugOverlay({ maze, visible, onToggle }: MazeDebugOverlayProps) {
+export function MazeDebugOverlay({
+  maze,
+  visible,
+  onToggle,
+}: MazeDebugOverlayProps) {
   if (!visible) {
     return (
       <div className="fixed bottom-4 right-4">
@@ -30,14 +34,16 @@ export function MazeDebugOverlay({ maze, visible, onToggle }: MazeDebugOverlayPr
 
   // Helper: Get dead end at position
   const getDeadEnd = (row: number, col: number) => {
-    return deadEnds?.find((de) => de.position.row === row && de.position.col === col);
+    return deadEnds?.find(
+      (de) => de.position.row === row && de.position.col === col
+    );
   };
 
   // Helper: Get dead end color based on depth
   const getDeadEndColor = (depth: number): string => {
-    if (depth <= 2) return 'bg-orange-300/40'; // Shallow
-    if (depth <= 5) return 'bg-orange-500/40'; // Medium
-    return 'bg-red-500/40'; // Deep
+    if (depth <= 2) return "bg-orange-300/40"; // Shallow
+    if (depth <= 5) return "bg-orange-500/40"; // Medium
+    return "bg-red-500/40"; // Deep
   };
 
   return (
@@ -46,7 +52,7 @@ export function MazeDebugOverlay({ maze, visible, onToggle }: MazeDebugOverlayPr
       <div className="absolute inset-0 pointer-events-none">
         <div className="w-full max-w-2xl mx-auto p-4">
           <div
-            className="grid gap-0"
+            className="grid gap-0 border-4 border-transparent"
             style={{
               gridTemplateColumns: `repeat(${maze.width}, 1fr)`,
             }}
@@ -60,8 +66,8 @@ export function MazeDebugOverlay({ maze, visible, onToggle }: MazeDebugOverlayPr
                   <div
                     key={`debug-${cell.row}-${cell.col}`}
                     className={cn(
-                      'aspect-square relative',
-                      isSolution && 'bg-green-500/30',
+                      "aspect-square relative",
+                      isSolution && "bg-green-500/30",
                       deadEnd && !isSolution && getDeadEndColor(deadEnd.depth)
                     )}
                   />
@@ -89,22 +95,30 @@ export function MazeDebugOverlay({ maze, visible, onToggle }: MazeDebugOverlayPr
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Solution Length:</span>
-                <span className="font-medium">{metrics.solutionLength} cells</span>
+                <span className="font-medium">
+                  {metrics.solutionLength} cells
+                </span>
               </div>
 
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Tortuosity:</span>
-                <span className="font-medium">{metrics.solutionTortuosity.toFixed(2)}</span>
+                <span className="font-medium">
+                  {metrics.solutionTortuosity.toFixed(2)}
+                </span>
               </div>
 
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Avg Dead End:</span>
-                <span className="font-medium">{metrics.averageDeadEndLength.toFixed(1)} cells</span>
+                <span className="font-medium">
+                  {metrics.averageDeadEndLength.toFixed(1)} cells
+                </span>
               </div>
 
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Max Dead End:</span>
-                <span className="font-medium">{metrics.maxDeadEndLength} cells</span>
+                <span className="font-medium">
+                  {metrics.maxDeadEndLength} cells
+                </span>
               </div>
 
               <div className="flex justify-between">
@@ -113,12 +127,18 @@ export function MazeDebugOverlay({ maze, visible, onToggle }: MazeDebugOverlayPr
               </div>
 
               <div className="flex justify-between pt-2 border-t">
-                <span className="text-muted-foreground font-semibold">Complexity Score:</span>
-                <span className="font-bold">{metrics.complexityScore.toFixed(1)}/100</span>
+                <span className="text-muted-foreground font-semibold">
+                  Complexity Score:
+                </span>
+                <span className="font-bold">
+                  {metrics.complexityScore.toFixed(1)}/100
+                </span>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No metrics available</p>
+            <p className="text-sm text-muted-foreground">
+              No metrics available
+            </p>
           )}
 
           {/* Legend */}

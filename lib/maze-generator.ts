@@ -128,6 +128,26 @@ function carveMaze(grid: Cell[][], start: Position): void {
 }
 
 /**
+ * Select opposite corners
+ */
+function selectOppositeCorners(width: number, height: number): { start: Position; end: Position } {
+  // Pick one of two opposite corner pairs
+  const useTopLeft = Math.random() < 0.5;
+
+  if (useTopLeft) {
+    return {
+      start: { row: 0, col: 0 },
+      end: { row: height - 1, col: width - 1 },
+    };
+  } else {
+    return {
+      start: { row: 0, col: width - 1 },
+      end: { row: height - 1, col: 0 },
+    };
+  }
+}
+
+/**
  * Select start position on top or left edge
  */
 function selectOppositeEdges(width: number, height: number): { start: Position; end: Position } {
@@ -234,6 +254,8 @@ function selectStartEndPositions(
   strategy: PlacementStrategy
 ): { start: Position; end: Position } {
   switch (strategy) {
+    case 'opposite-corners':
+      return selectOppositeCorners(width, height);
     case 'opposite-edges':
       return selectOppositeEdges(width, height);
     case 'random-far':
@@ -348,11 +370,11 @@ export function getDifficultyConfig(difficulty: Difficulty): DifficultyPreset {
       return {
         dimensions: { width: 10, height: 10 },
         generationConfig: {
-          placementStrategy: 'opposite-edges',
+          placementStrategy: 'opposite-corners',
           enhancement: {
             deadEndMinLength: 2,
-            deadEndExtensions: 0, // Disabled for debugging
-            decoyPathCount: 0, // Disabled for debugging
+            deadEndExtensions: 2,
+            decoyPathCount: 1,
             prioritizeEarlyDeadEnds: true,
           },
           selectionCriteria: {
@@ -369,11 +391,11 @@ export function getDifficultyConfig(difficulty: Difficulty): DifficultyPreset {
       return {
         dimensions: { width: 15, height: 15 },
         generationConfig: {
-          placementStrategy: 'random-far',
+          placementStrategy: 'opposite-corners',
           enhancement: {
             deadEndMinLength: 3,
-            deadEndExtensions: 0, // Disabled for debugging
-            decoyPathCount: 0, // Disabled for debugging
+            deadEndExtensions: 3,
+            decoyPathCount: 2,
             prioritizeEarlyDeadEnds: true,
           },
           selectionCriteria: {
@@ -390,11 +412,11 @@ export function getDifficultyConfig(difficulty: Difficulty): DifficultyPreset {
       return {
         dimensions: { width: 20, height: 20 },
         generationConfig: {
-          placementStrategy: 'random-far',
+          placementStrategy: 'opposite-corners',
           enhancement: {
             deadEndMinLength: 4,
-            deadEndExtensions: 0, // Disabled for debugging
-            decoyPathCount: 0, // Disabled for debugging
+            deadEndExtensions: 5,
+            decoyPathCount: 4,
             prioritizeEarlyDeadEnds: true,
           },
           selectionCriteria: {

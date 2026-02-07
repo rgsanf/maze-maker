@@ -1,11 +1,11 @@
 import type {
-  MazeState,
-  Position,
   Cell,
   DeadEndInfo,
-  MazeQualityMetrics,
   EnhancedMazeState,
-} from './maze-types';
+  MazeQualityMetrics,
+  MazeState,
+  Position,
+} from "./maze-types";
 
 /**
  * Check if two positions are equal
@@ -87,7 +87,10 @@ export function findShortestPath(maze: MazeState): Position[] | null {
       const key = `${neighbor.row},${neighbor.col}`;
       if (!visited.has(key)) {
         visited.add(key);
-        queue.push([neighbor, [...path, { row: neighbor.row, col: neighbor.col }]]);
+        queue.push([
+          neighbor,
+          [...path, { row: neighbor.row, col: neighbor.col }],
+        ]);
       }
     }
   }
@@ -98,12 +101,16 @@ export function findShortestPath(maze: MazeState): Position[] | null {
 /**
  * Calculate the distance from a position to the nearest point on a path
  */
-function distanceToPath(pos: Position, path: Position[]): { minDistance: number; nearestIndex: number } {
+function distanceToPath(
+  pos: Position,
+  path: Position[]
+): { minDistance: number; nearestIndex: number } {
   let minDistance = Infinity;
   let nearestIndex = 0;
 
   for (let i = 0; i < path.length; i++) {
-    const distance = Math.abs(pos.row - path[i].row) + Math.abs(pos.col - path[i].col);
+    const distance =
+      Math.abs(pos.row - path[i].row) + Math.abs(pos.col - path[i].col);
     if (distance < minDistance) {
       minDistance = distance;
       nearestIndex = i;
@@ -131,24 +138,14 @@ function calculateDeadEndDepth(grid: Cell[][], start: Cell): number {
     // If we hit a junction (more than 2 openings), stop
     if (openings > 2) break;
 
-    // If we're at the start (1 opening), increment depth
-    if (openings === 1) {
-      depth++;
-      // Dead end cell itself - no more to explore
-      break;
-    } else if (openings === 2) {
-      // Continue down the corridor
-      depth++;
-      const neighbors = getValidNeighbors(grid, current);
-      const unvisitedNeighbor = neighbors.find(
-        (n) => !visited.has(`${n.row},${n.col}`)
-      );
-      if (!unvisitedNeighbor) break;
-      current = unvisitedNeighbor;
-    } else {
-      // No openings or dead end, stop
-      break;
-    }
+    // Count this cell and walk toward the junction (1 = tip, 2 = corridor)
+    depth++;
+    const neighbors = getValidNeighbors(grid, current);
+    const unvisitedNeighbor = neighbors.find(
+      (n) => !visited.has(`${n.row},${n.col}`)
+    );
+    if (!unvisitedNeighbor) break;
+    current = unvisitedNeighbor;
   }
 
   return depth;
@@ -184,7 +181,10 @@ export function identifyDeadEnds(
         let distanceAlongSolution: number | undefined;
 
         if (solutionPath) {
-          const { minDistance, nearestIndex } = distanceToPath(position, solutionPath);
+          const { minDistance, nearestIndex } = distanceToPath(
+            position,
+            solutionPath
+          );
           nearSolution = minDistance <= 2;
           distanceAlongSolution = nearestIndex;
         }
@@ -207,17 +207,21 @@ export function identifyDeadEnds(
  * Get direction from one position to another
  */
 function getDirection(from: Position, to: Position): string {
-  if (to.row < from.row) return 'up';
-  if (to.row > from.row) return 'down';
-  if (to.col < from.col) return 'left';
-  if (to.col > from.col) return 'right';
-  return 'none';
+  if (to.row < from.row) return "up";
+  if (to.row > from.row) return "down";
+  if (to.col < from.col) return "left";
+  if (to.col > from.col) return "right";
+  return "none";
 }
 
 /**
  * Calculate solution tortuosity (how winding the path is)
  */
-function calculateTortuosity(solutionPath: Position[], start: Position, end: Position): number {
+function calculateTortuosity(
+  solutionPath: Position[],
+  start: Position,
+  end: Position
+): number {
   if (solutionPath.length < 3) return 0;
 
   // Count direction changes
@@ -231,7 +235,8 @@ function calculateTortuosity(solutionPath: Position[], start: Position, end: Pos
   }
 
   // Calculate Manhattan distance
-  const manhattanDistance = Math.abs(end.row - start.row) + Math.abs(end.col - start.col);
+  const manhattanDistance =
+    Math.abs(end.row - start.row) + Math.abs(end.col - start.col);
 
   // Tortuosity: direction changes normalized by straight-line distance
   return manhattanDistance > 0 ? directionChanges / manhattanDistance : 0;
@@ -254,7 +259,10 @@ function calculateComplexityScore(
   const deadEndScore = Math.min(avgDeadEndLength * 4, 25);
   const decoyScore = Math.min(decoyDeadEnds * 2, 15);
 
-  return Math.min(lengthScore + tortuosityScore + deadEndScore + decoyScore, 100);
+  return Math.min(
+    lengthScore + tortuosityScore + deadEndScore + decoyScore,
+    100
+  );
 }
 
 /**

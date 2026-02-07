@@ -240,8 +240,17 @@ export function extendDeadEnds(
   config: EnhancementConfig,
   end: Position
 ): number {
-  // Filter for dead ends near solution
-  const nearSolution = deadEnds.filter((de) => de.nearSolution);
+  // Filter for dead ends near solution AND not too close to the end
+  // Use both path position (first 60%) AND spatial distance (>5 cells from end)
+  const maxSolutionIndex = Math.floor(solutionPath.length * 0.6);
+  const minDistanceToEnd = 5;
+
+  const nearSolution = deadEnds.filter(
+    (de) =>
+      de.nearSolution &&
+      (de.distanceAlongSolution ?? 0) < maxSolutionIndex &&
+      de.distanceToEnd > minDistanceToEnd
+  );
 
   // Sort by distance along solution (ascending = earlier positions first)
   nearSolution.sort((a, b) => {
@@ -334,12 +343,17 @@ function carveDecoyPath(
 export function addDecoyPaths(
   grid: Cell[][],
   solutionPath: Position[],
-  count: number
+  count: number,
+  end: Position
 ): number {
   const candidates: { cell: Cell; quality: number; pathIndex: number }[] = [];
 
+  // Exclude the last 40% of solution path (near the end) to avoid unreachable branches
+  const maxIndex = Math.floor(solutionPath.length * 0.6);
+  const minDistanceToEnd = 5;
+
   // Find cells adjacent to solution path (through walls)
-  for (let i = 0; i < solutionPath.length; i++) {
+  for (let i = 0; i < maxIndex; i++) {
     const pathPos = solutionPath[i];
     const pathCell = grid[pathPos.row][pathPos.col];
     const walledNeighbors = getWalledNeighbors(grid, pathCell);
@@ -350,8 +364,15 @@ export function addDecoyPaths(
         continue;
       }
 
+      // Skip if too close to the end spatially
+      const distanceToEnd =
+        Math.abs(neighbor.cell.row - end.row) + Math.abs(neighbor.cell.col - end.col);
+      if (distanceToEnd <= minDistanceToEnd) {
+        continue;
+      }
+
       // Evaluate quality: prefer middle of solution, cells with few existing openings
-      const progressRatio = i / solutionPath.length;
+      const progressRatio = i / maxIndex;
       const middleness = 1 - Math.abs(progressRatio - 0.5) * 2; // 1 at middle, 0 at ends
       const openings = countOpenings(neighbor.cell);
       const quality = middleness * 10 + (4 - openings) * 2;
@@ -398,7 +419,7 @@ export function enhanceMaze(maze: EnhancedMazeState, config: EnhancementConfig):
   const extended = extendDeadEnds(grid, deadEnds, solutionPath, config, end);
 
   // Add decoy paths
-  const decoysAdded = addDecoyPaths(grid, solutionPath, config.decoyPathCount);
+  const decoysAdded = addDecoyPaths(grid, solutionPath, config.decoyPathCount, end);
 
   // Validate maze is still solvable
   const newSolution = findShortestPath(maze);

@@ -36,7 +36,7 @@ export interface PlayerState {
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
 // Enhanced maze generation types
-export type PlacementStrategy = 'opposite-edges' | 'random-far' | 'maximum-distance';
+export type PlacementStrategy = 'opposite-corners' | 'opposite-edges' | 'random-far' | 'maximum-distance';
 
 export interface MazeQualityMetrics {
   solutionLength: number;
